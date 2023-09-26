@@ -36,7 +36,11 @@ PGADMIN_PASSWORD=admin
 
 - Locate the navbar in the PgAmdin panel and go to `Object > Register > Server`. It will open a window to create a new server. Fill in the fields `Host name/Address: db`, `Port: 5432`, `Username: postgres`, and `Password: password`:
 
+![alt text](https://github.com/jvelazquez-reyes/edt-test/blob/main/img:pgAdmin.png)
+
 - Restart the `app` service. You can do this using the Docker Desktop. Locate the `app` service, hit the three dots on the right and restart the service as shown in the image below:
+
+![alt text](https://github.com/jvelazquez-reyes/edt-test/blob/main/img:docker.png)
 
 - Visit port `8000` to use the `FastAPI` app:
 ```sh
@@ -48,6 +52,11 @@ http://0.0.0.0:8000
 ```
 
 ## Endpoints
+- Visit the built-in API docs from FastAPI:
+```sh
+http://0.0.0.0:8000/docs
+```
+
 - `GET` endpoint to get all restaurants:
 ```sh
 http://0.0.0.1:8000/restaurant/
@@ -116,3 +125,15 @@ http://0.0.0.1:8000/restaurant/delete
 ```sh
 http://0.0.0.1:8000/restaurant/statistics/?latitude=17.4341231&longitude=-99.1265732&radius=138
 ```
+
+- `PostGIS` was used to perform the spatial queries. The following query was implemented to count the number of restaurants that fall within a `radius` in meters.
+
+```sh
+"""SELECT COUNT(rating) FROM restaurant where ST_Distance('POINT(:lng :lat)'::geography, ST_MakePoint(lng,lat)) * 0.000621371 <= :radius;"""
+```
+
+Where `ST_Distance` returns the minimum distance between two geometries in miles.
+    - `'POINT(:lng :lat)'::geometry` corresponds to the `latitude` and `longitude` as parameteres in the `GET` requests
+    - `ST_MakePoint(lng,lat)` corresponds to the geometry from the `lng` and `lat` values stored in the database
+    
+To convert the distance from miles to meters, the conversion factor used was 0.000621371
